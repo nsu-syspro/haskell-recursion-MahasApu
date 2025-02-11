@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -Wall #-}
+-- {-# OPTIONS_GHC -Wall #-}
 -- The above pragma enables all warnings
 
 module Task1 where
@@ -22,7 +22,7 @@ import Prelude hiding (reverse, map, filter, sum, foldl, foldr, length, head, ta
 -- False
 
 validate :: Integer -> Bool
-validate = error "TODO: define validate"
+validate x = lunhFunction (div x 10) == fromInteger (mod x 10)
 
 -----------------------------------
 --
@@ -33,9 +33,14 @@ validate = error "TODO: define validate"
 -- >>> luhn [3,4,5,6]
 -- 1
 
-luhn :: [Int] -> Int
-luhn = error "TODO: define luhn"
+luhnFormula :: Int -> Int
+luhnFormula x = mod (10 - mod x 10) 10
 
+luhn :: [Int] -> Int
+luhn x = luhnFormula (sum (map normalize (doubleEveryOther (reverse x))))
+
+lunhFunction :: Integer -> Int
+lunhFunction x = luhn (toDigits x)
 -----------------------------------
 --
 -- Produces list of digits for given positive number;
@@ -46,12 +51,18 @@ luhn = error "TODO: define luhn"
 -- >>> toDigits 3456
 -- [3,4,5,6]
 -- >>> toDigits 0
--- []
+-- [0]
 -- >>> toDigits (-123)
 -- []
 
+isDigit :: Integer -> Bool
+isDigit x = x < 10
+
 toDigits :: Integer -> [Int]
-toDigits = error "TODO: define toDigits"
+toDigits x 
+    | x <= 0      = [ ]
+    | isDigit x = [fromIntegral x]
+    | otherwise   = toDigits (div x 10) ++ [fromIntegral (mod x 10)]
 
 -----------------------------------
 --
@@ -65,8 +76,9 @@ toDigits = error "TODO: define toDigits"
 -- [6,5,4,3]
 
 reverse :: [a] -> [a]
-reverse = error "TODO: define reverse"
-
+reverse [ ]      = [ ]
+reverse (x : xs) = reverse xs ++ [x]
+ 
 -----------------------------------
 --
 -- Doubles every other digit starting from first one
@@ -76,8 +88,14 @@ reverse = error "TODO: define reverse"
 -- >>> doubleEveryOther [6,5,4,3]
 -- [12,5,8,3]
 
+doubleIfEvenIndex :: (Int, Int) -> Int
+doubleIfEvenIndex (i, x) = if even i then x * 2 else x
+
+addIndices :: [Int] -> [(Int, Int)]
+addIndices = zip [0..]
+
 doubleEveryOther :: [Int] -> [Int]
-doubleEveryOther = error "TODO: define doubleEveryOther"
+doubleEveryOther xs = map doubleIfEvenIndex (addIndices xs)
 
 -----------------------------------
 --
@@ -94,7 +112,7 @@ doubleEveryOther = error "TODO: define doubleEveryOther"
 -- 1
 
 normalize :: Int -> Int
-normalize = error "TODO: define normalize"
+normalize x = if x >= 10 then x - 9 else x
 
 -----------------------------------
 --
@@ -107,7 +125,8 @@ normalize = error "TODO: define normalize"
 -- [2,4,6,8]
 
 map :: (a -> b) -> [a] -> [b]
-map = error "TODO: define map"
+map _ [ ]         = [ ]
+map func (x : xs) = func x : map func xs
 
 -----------------------------------
 --
@@ -121,4 +140,7 @@ map = error "TODO: define map"
 -- 0
 
 sum :: [Int] -> Int
-sum = error "TODO: define sum"
+sum [ ]      = 0
+sum [x]      = x
+sum (x : xs) = x + sum xs 
+
