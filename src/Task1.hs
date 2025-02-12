@@ -26,6 +26,30 @@ validate x = lunhFunction (div x 10) == fromInteger (mod x 10)
 
 -----------------------------------
 --
+-- Just a formula used for Luhn algorithm
+--
+-- Usage example:
+--
+-- >>> luhnFormula 3456 10
+-- 4
+luhnFormula :: Int -> Int -> Int
+luhnFormula x n = mod (n - mod x n) n
+
+-----------------------------------
+--
+-- Computes check digit for given digits using Luhn algorithm with
+-- an additional parameter `n` which is used as base for formula
+--
+-- Usage example:
+-- 
+-- >>> luhnN [3,4,5,6] 10
+-- 1
+
+luhnN:: [Int] -> Int -> Int
+luhnN x n = luhnFormula (sum (map (normalize n) (doubleEveryOther (reverse x)))) n
+
+-----------------------------------
+--
 -- Computes check digit for given digits using Luhn algorithm
 --
 -- Usage example:
@@ -33,14 +57,20 @@ validate x = lunhFunction (div x 10) == fromInteger (mod x 10)
 -- >>> luhn [3,4,5,6]
 -- 1
 
-luhnFormula :: Int -> Int
-luhnFormula x = mod (10 - mod x 10) 10
-
 luhn :: [Int] -> Int
-luhn x = luhnFormula (sum (map normalize (doubleEveryOther (reverse x))))
+luhn x = luhnN x 10
+
+-----------------------------------
+--
+-- Computes Luhn check digit for an integer by converting it to digits and using Luhn algorithm
+-- Usage example:
+--
+-- >>> lunhFunction 3456
+-- 1
 
 lunhFunction :: Integer -> Int
 lunhFunction x = luhn (toDigits x)
+
 -----------------------------------
 --
 -- Produces list of digits for given positive number;
@@ -56,7 +86,7 @@ lunhFunction x = luhn (toDigits x)
 -- []
 
 isDigit :: Integer -> Bool
-isDigit x = x < 10
+isDigit x = div x 10 == 0
 
 toDigits :: Integer -> [Int]
 toDigits x 
@@ -78,6 +108,32 @@ toDigits x
 reverse :: [a] -> [a]
 reverse [ ]      = [ ]
 reverse (x : xs) = reverse xs ++ [x]
+
+-----------------------------------
+--
+-- Doubles every even indexed digit starting from first one
+--
+-- Usage example:
+--
+-- >>> doubleIfEvenIndex (0,6)
+-- 12
+-- >>> doubleIfEvenIndex (1,6)
+-- 6
+doubleIfEvenIndex :: (Int, Int) -> Int
+doubleIfEvenIndex (i, x) = if even i then x * 2 else x
+
+-----------------------------------
+--
+-- Returns list of tuples (index, Int) 
+--
+-- Usage example:
+--
+-- >>> addIndices [5,5,4]
+-- [(0,5),(1,5),(2,4)]
+
+addIndices :: [Int] -> [(Int, Int)]
+addIndices = zip [0..]
+
  
 -----------------------------------
 --
@@ -87,12 +143,6 @@ reverse (x : xs) = reverse xs ++ [x]
 --
 -- >>> doubleEveryOther [6,5,4,3]
 -- [12,5,8,3]
-
-doubleIfEvenIndex :: (Int, Int) -> Int
-doubleIfEvenIndex (i, x) = if even i then x * 2 else x
-
-addIndices :: [Int] -> [(Int, Int)]
-addIndices = zip [0..]
 
 doubleEveryOther :: [Int] -> [Int]
 doubleEveryOther xs = map doubleIfEvenIndex (addIndices xs)
@@ -111,8 +161,8 @@ doubleEveryOther xs = map doubleIfEvenIndex (addIndices xs)
 -- >>> normalize 1
 -- 1
 
-normalize :: Int -> Int
-normalize x = if x >= 10 then x - 9 else x
+normalize :: Int -> Int -> Int
+normalize n x = if x >= n then x - (n - 1) else x
 
 -----------------------------------
 --
