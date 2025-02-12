@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -Wall #-}
+-- {-# OPTIONS_GHC -Wall #-}
 -- The above pragma enables all warnings
 
 module Task1 where
@@ -22,7 +22,31 @@ import Prelude hiding (reverse, map, filter, sum, foldl, foldr, length, head, ta
 -- False
 
 validate :: Integer -> Bool
-validate = error "TODO: define validate"
+validate x = lunhFunction (div x 10) == fromInteger (mod x 10)
+
+-----------------------------------
+--
+-- Just a formula used for Luhn algorithm
+--
+-- Usage example:
+--
+-- >>> luhnFormula 3456 10
+-- 4
+luhnFormula :: Int -> Int -> Int
+luhnFormula x n = mod (n - mod x n) n
+
+-----------------------------------
+--
+-- Computes check digit for given digits using Luhn algorithm with
+-- an additional parameter `n` which is used as base for formula
+--
+-- Usage example:
+-- 
+-- >>> luhnN [3,4,5,6] 10
+-- 1
+
+luhnN:: [Int] -> Int -> Int
+luhnN x n = luhnFormula (sum (map (normalize n) (doubleEveryOther (reverse x)))) n
 
 -----------------------------------
 --
@@ -34,7 +58,18 @@ validate = error "TODO: define validate"
 -- 1
 
 luhn :: [Int] -> Int
-luhn = error "TODO: define luhn"
+luhn x = luhnN x 10
+
+-----------------------------------
+--
+-- Computes Luhn check digit for an integer by converting it to digits and using Luhn algorithm
+-- Usage example:
+--
+-- >>> lunhFunction 3456
+-- 1
+
+lunhFunction :: Integer -> Int
+lunhFunction x = luhn (toDigits x)
 
 -----------------------------------
 --
@@ -46,12 +81,18 @@ luhn = error "TODO: define luhn"
 -- >>> toDigits 3456
 -- [3,4,5,6]
 -- >>> toDigits 0
--- []
+-- [0]
 -- >>> toDigits (-123)
 -- []
 
+isDigit :: Integer -> Bool
+isDigit x = div x 10 == 0
+
 toDigits :: Integer -> [Int]
-toDigits = error "TODO: define toDigits"
+toDigits x 
+    | x <= 0      = [ ]
+    | isDigit x = [fromIntegral x]
+    | otherwise   = toDigits (div x 10) ++ [fromIntegral (mod x 10)]
 
 -----------------------------------
 --
@@ -65,8 +106,35 @@ toDigits = error "TODO: define toDigits"
 -- [6,5,4,3]
 
 reverse :: [a] -> [a]
-reverse = error "TODO: define reverse"
+reverse [ ]      = [ ]
+reverse (x : xs) = reverse xs ++ [x]
 
+-----------------------------------
+--
+-- Doubles every even indexed digit starting from first one
+--
+-- Usage example:
+--
+-- >>> doubleIfEvenIndex (0,6)
+-- 12
+-- >>> doubleIfEvenIndex (1,6)
+-- 6
+doubleIfEvenIndex :: (Int, Int) -> Int
+doubleIfEvenIndex (i, x) = if even i then x * 2 else x
+
+-----------------------------------
+--
+-- Returns list of tuples (index, Int) 
+--
+-- Usage example:
+--
+-- >>> addIndices [5,5,4]
+-- [(0,5),(1,5),(2,4)]
+
+addIndices :: [Int] -> [(Int, Int)]
+addIndices = zip [0..]
+
+ 
 -----------------------------------
 --
 -- Doubles every other digit starting from first one
@@ -77,7 +145,7 @@ reverse = error "TODO: define reverse"
 -- [12,5,8,3]
 
 doubleEveryOther :: [Int] -> [Int]
-doubleEveryOther = error "TODO: define doubleEveryOther"
+doubleEveryOther xs = map doubleIfEvenIndex (addIndices xs)
 
 -----------------------------------
 --
@@ -93,8 +161,8 @@ doubleEveryOther = error "TODO: define doubleEveryOther"
 -- >>> normalize 1
 -- 1
 
-normalize :: Int -> Int
-normalize = error "TODO: define normalize"
+normalize :: Int -> Int -> Int
+normalize n x = if x >= n then x - (n - 1) else x
 
 -----------------------------------
 --
@@ -107,7 +175,8 @@ normalize = error "TODO: define normalize"
 -- [2,4,6,8]
 
 map :: (a -> b) -> [a] -> [b]
-map = error "TODO: define map"
+map _ [ ]         = [ ]
+map func (x : xs) = func x : map func xs
 
 -----------------------------------
 --
@@ -121,4 +190,7 @@ map = error "TODO: define map"
 -- 0
 
 sum :: [Int] -> Int
-sum = error "TODO: define sum"
+sum [ ]      = 0
+sum [x]      = x
+sum (x : xs) = x + sum xs 
+
